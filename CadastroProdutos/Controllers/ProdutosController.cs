@@ -1,3 +1,4 @@
+using CadastroProdutos.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,22 +8,25 @@ namespace CadastroProdutos.Controllers
     [ApiController]
     public class ProdutosController : ControllerBase
     {
-        private static List<Produto> produtos = new List<Produto>()
-        {
-            new Produto() { Id = 1, Nome = "Mouse sem fio", Preco = 99.90M, Estoque = 50 },
-            new Produto() { Id = 2, Nome = "Teclado", Preco = 249.90M, Estoque = 30 }
-        };
 
+        private IProdutosService produtosService;
+
+        public ProdutosController(IProdutosService produtosService)
+        {
+            this.produtosService = produtosService;
+        }
+        
         [HttpGet]
         public ActionResult<List<Produto>> Get()
         {
-            return Ok(produtos);
+            return Ok(produtosService.ObterTodos());
         }
 
         [HttpGet("{id}")]
         public ActionResult<Produto> GetById(int id)
         {
-            var produto = produtos.FirstOrDefault(x => x.Id == id);
+            var produto = produtosService.ObterPorId(id);
+
             if (produto is null)
             {
                 return NotFound($"Produto com ID {id} não encontrado.");
@@ -33,35 +37,31 @@ namespace CadastroProdutos.Controllers
         [HttpPost]
         public ActionResult Post(Produto novoProduto)
         {
-            produtos.Add(novoProduto);
+            produtosService.Adicionar(novoProduto);
             return Created();
         }
 
         [HttpPut("{id}")]
         public ActionResult<Produto> Put(int id, Produto produtoAtualizado)
         {
-            var produto = produtos.FirstOrDefault(x => x.Id == id);
+            var produto = produtosService.Atualizar(id, produtoAtualizado);
+
             if (produto is null)
             {
                 return NotFound($"Produto com ID {id} não encontrado.");
             }
-            produto.Nome = produtoAtualizado.Nome;
-            produto.Preco = produtoAtualizado.Preco;
-            produto.Estoque = produtoAtualizado.Estoque;
-
             return Ok(produto);
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var produto = produtos.FirstOrDefault(x => x.Id == id);
-            if (produto is null)
+            var deletou = produtosService.Remover(id);
+
+            if (deletou == false)
             {
                 return NotFound($"Produto com ID {id} não encontrado.");
             }
-
-            produtos.Remove(produto);
 
             return NoContent();
         }
