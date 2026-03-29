@@ -1,9 +1,11 @@
 using CadastroProdutos.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CadastroProdutos.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProdutosController : ControllerBase
@@ -34,6 +36,7 @@ namespace CadastroProdutos.Controllers
             return Ok(produto);
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public ActionResult Post(Produto novoProduto)
         {
@@ -48,6 +51,7 @@ namespace CadastroProdutos.Controllers
             }
         }
 
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
         public ActionResult<Produto> Put(int id, Produto produtoAtualizado)
         {
@@ -67,6 +71,7 @@ namespace CadastroProdutos.Controllers
             }
         }
 
+        [Authorize(Roles = "admin")]
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
